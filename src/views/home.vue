@@ -70,10 +70,47 @@
         </v-row>
       </v-container>
     </v-form>
+    <v-snackbar
+      :timeout="3000"
+      :value="snackbar"
+      absolute
+      bottom
+      :dark="true"
+      color="red lighten-3"
+      outlined
+      right
+    >
+      Пользователь с таким e-mail не найден
+    </v-snackbar>
+    <v-snackbar
+      :timeout="3000"
+      :value="snackbar2"
+      absolute
+      bottom
+      :dark="true"
+      color="red lighten-3"
+      outlined
+      right
+    >
+      Неверный пароль
+    </v-snackbar>
+    <v-snackbar
+      :timeout="3000"
+      :value="snackbar3"
+      absolute
+      bottom
+      :dark="true"
+      color="red lighten-3"
+      outlined
+      right
+    >
+      Авторизация не удалась. Проверьте данные для входа.
+    </v-snackbar>
   </v-app>
 </template>
 
 <script>
+import firebase from 'firebase'
 
 export default {
   data() {
@@ -84,12 +121,28 @@ export default {
         rules: {
           required: value => !!value || 'Поле обязательно для заполнения.',
         },
+        snackbar: false,
+        snackbar2: false,
+        snackbar3: false,
     }
   },
   methods: {
     auth(){
-      console.log(this.login);
-      console.log(this.password);
+      firebase.auth().signInWithEmailAndPassword(this.login, this.password)
+      .then((userCredential) => {
+        var user = userCredential.user;
+        window.location.replace("/form");
+        localStorage.setItem('uid', user.uid);
+        console.log(user);
+      })
+      .catch((error) => {
+        var errorCode = error.code;
+        if(errorCode == 'auth/user-not-found'){
+          this.snackbar = true;
+        } else if(errorCode == 'auth/wrong-password') {
+          this.snackbar2 = true;          
+        } else {this.snackbar3 = true;}
+      });
     }
   }
 }
