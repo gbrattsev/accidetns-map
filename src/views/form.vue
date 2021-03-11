@@ -71,7 +71,7 @@
 </template>
 
 <script>
-// import firebase from 'firebase'
+import firebase from 'firebase'
 export default {
   
   name: 'Form',
@@ -83,12 +83,19 @@ export default {
       rules: {
         required: value => !!value || 'Заполните поле.',
       },
-      accidents: [
-          'Яма',
-          'Прорыв трубы',
-          'Неубранный снег'
-      ]
+      accidents: []
     }
+  },
+  mounted(){
+    
+    var db = firebase.firestore();
+    let temp = [];
+    db.collection("Accident").get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          temp.push(doc.data().name);
+        });
+    });
+    this.accidents = temp;
   },
   methods: {
     send(){

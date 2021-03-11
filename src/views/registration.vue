@@ -14,7 +14,7 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-form ref="form">
+    <v-form ref="form" v-model="valid">
       <v-container>
         <v-row>
           <v-col cols="12" md="6">
@@ -98,6 +98,7 @@
             <v-btn
               elevation="2"
               @click.prevent="reg"
+              :disabled="!valid"
             >Зарегистрироваться</v-btn>
           </v-col>
         </v-row>
@@ -113,6 +114,7 @@ export default {
   name: 'Registration',
   data(){
     return{
+      valid:false,
       login: '',
       phone: '',
       email: '',
@@ -121,6 +123,7 @@ export default {
       emailRepeat: '',
       password: '',
       passwordRepeat: '',
+      db: null,
       rules: {
         required: value => !!value || 'Заполните поле.',
         email: value => {
@@ -133,17 +136,32 @@ export default {
         passCompare: value => {
           return (this.password == value) || 'Пароли отличаются.'
         },
-        counter: value => value.length >= 8 || 'Минимум 8 символов',
+        counter: value => value.length >= 6 || 'Минимум 6 символов',
       },
     }
+  },
+  mounted(){    
+    this.db = firebase.firestore();
   },
   methods: {
     reg(){
       firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
       .then((userCredential) => {
         var user = userCredential.user;
-        console.log(user);
-        // ...
+        this.db.collection("users").doc(this.email).set({
+            name: this.login,
+            phone: this.phone,
+            email: this.email
+        })
+        .then(() => {
+            window.location.replace("/form");
+            localStorage.setItem('uid', user.uid);
+            console.log(user);
+            console.log("Данные пользователя сохранены в БД");
+        })
+        .catch((error) => {
+            console.error("Ошибка записи в БД: ", error);
+        });
       })
       .catch((error) => {
         console.log(error)

@@ -27,6 +27,7 @@
             :key="n.id"
             :marker-id="n.id"
             :coords="n.coords"
+            :balloon-template="balloonTemplate"
         ></ymap-marker>
     </yandex-map>
   </v-app>
@@ -43,7 +44,15 @@ export default {
     },
     data: () => ({
         coords: null,
-        markers: [],
+        markers: [
+            {
+                id: 1,
+                coords: [
+                    57.13653564049404,
+                    65.58163184603269,
+                ],
+            },
+        ],
         settings: {
           apiKey: 'df8c4e17-1449-4f39-9fa7-565bb7a180f2',
           lang: 'ru_RU',
@@ -51,12 +60,22 @@ export default {
           version: '2.1'            
         },
     }),
+  computed: {
+    balloonTemplate() {
+      return `
+        <h3>Привет</h3>
+        <p>Авария здесь: ${this.coords}</p>
+      `
+    }
+  },
     methods: {
         onClick(e) {
             this.markers.push({
             id: 1 + Math.max(0, ...this.markers.map(n => n.id)),
             coords: e.get('coords'),
             });
+            console.log(this.markers);
+            
         },
     },
     async mounted() {

@@ -12,6 +12,7 @@ import 'roboto-fontface/css/roboto/roboto-fontface.css'
 Vue.config.productionTip = false
 
 firebase.initializeApp(firebaseConfig)
+require("firebase/firestore");
 
 new Vue({
   router,
