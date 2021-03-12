@@ -142,6 +142,11 @@ export default {
   },
   mounted(){    
     this.db = firebase.firestore();
+    const uid = localStorage.getItem('uid');
+    if(uid) {
+      window.location.replace("/form");
+      console.log(uid);
+    }
   },
   methods: {
     reg(){
@@ -149,6 +154,7 @@ export default {
       .then((userCredential) => {
         var user = userCredential.user;
         this.db.collection("users").doc(this.email).set({
+            id: user.uid,
             name: this.login,
             phone: this.phone,
             email: this.email

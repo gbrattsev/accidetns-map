@@ -14,6 +14,7 @@
     "roboto-fontface": "*",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
+    "vue-suggestions": "^1.4.0",
     "vue-yandex-maps": "^0.10.9",
     "vuetify": "^2.4.0",
     "vuex": "^3.4.0"

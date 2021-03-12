@@ -146,6 +146,11 @@ export default {
     }
   },
   mounted(){
+    const uid = localStorage.getItem('uid');
+    if(uid) {
+      window.location.replace("/form");
+      console.log(uid);
+    }
   }
 }
 </script>

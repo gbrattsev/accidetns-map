@@ -21,15 +21,12 @@
       <v-container>
         <v-row>
           <v-col cols="12" md="6">
-            <v-text-field
-              v-model="address"
-              label="Введите адрес аварии"
-              :rules="[rules.required]"
-              name="address"
-              required
-              outlined
-              dense
-            ></v-text-field>
+            <VueSuggestions
+                :model.sync="city"
+                :coordinates.sync="coordinates"
+                :placeholder="'Начните вводить'"
+                :options="suggestionOptions">
+            </VueSuggestions>
           </v-col>
           <v-col
             class="d-flex"
@@ -72,25 +69,44 @@
 
 <script>
 import firebase from 'firebase'
-export default {
-  
+import VueSuggestions from 'vue-suggestions';
+export default {  
   name: 'Form',
   data(){
     return{
-      address: null,
+      db: null,
       accident: null,
       message: null,
       rules: {
         required: value => !!value || 'Заполните поле.',
       },
-      accidents: []
+      accidents: [],      
+      city: '',
+      coordinates: {
+        latitude: '',
+        longitude: ''
+      },
+      suggestionOptions: {
+        token: 'a74faaad2afdd1de9b7a5f6a730705cbcc05fd4f',
+        type: "ADDRESS",
+        scrollOnFocus: false,
+        triggerSelectOnBlur: true,
+        triggerSelectOnEnter: true,
+        addon: 'none',
+        onSelect (suggestion) {
+          if(!suggestion) { 
+            console.log('Введите адрес');
+          }
+        }
+      },
     }
   },
+  components: { VueSuggestions },
   mounted(){
     
-    var db = firebase.firestore();
+    this.db = firebase.firestore();
     let temp = [];
-    db.collection("Accident").get().then((querySnapshot) => {
+    this.db.collection("Accident").get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
           temp.push(doc.data().name);
         });
@@ -99,9 +115,36 @@ export default {
   },
   methods: {
     send(){
-        console.log(this.address);
-        console.log(this.accident);
-        console.log(this.message);
+      if(!this.coordinates.latitude || !this.coordinates.longitude) {
+        console.log('Адрес не найден. Введите ближайший адрес из подсказки');
+        return false;
+      }
+      if(!this.accident) {
+        console.log('Выберите тип аварии');
+        return false;        
+      }
+      if(!this.message) {
+        console.log('Введите комментарий');
+        return false;        
+      }
+        console.log(this.city);
+        console.log(this.coordinates.latitude);
+        console.log(this.coordinates.longitude);
+
+      this.db.collection("AccidentsList").doc(this.city).set({
+          id_user: localStorage.getItem('uid'),
+          comment: this.message,
+          adress: this.city,
+          latitude: this.coordinates.latitude,
+          longitude: this.coordinates.longitude,
+          accident: this.accident
+        })
+        .then(() => {
+          window.location.replace("/map");
+        })
+        .catch((error) => {
+          console.error("Ошибка записи в БД: ", error);
+        });
     }
   }
 }
